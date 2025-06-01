@@ -1,27 +1,26 @@
 import { Mastra } from "@mastra/core/mastra";
 import { PinoLogger } from "@mastra/loggers";
-import { LibSQLStore } from "@mastra/libsql";
-import { AISDKExporter } from "langsmith/vercel";
+// import { AISDKExporter } from "langsmith/vercel";
 
 import { myAgent, generateWithDynamicRole } from "./agents/my-agent";
+import { CloudflareDeployer } from "@mastra/deployer-cloudflare";
 
 export const mastra = new Mastra({
   agents: { myAgent },
-  storage: new LibSQLStore({
-    url: ":memory:",
-  }),
   logger: new PinoLogger({
     name: "Mastra",
     level: "info",
   }),
-  telemetry: {
-    serviceName: "your-service-name",
-    enabled: true,
-    export: {
-      type: "custom",
-      exporter: new AISDKExporter(),
-    },
-  },
+  // build時にlangsmithを利用するとエラーが出るのでコメントアウト
+  // 近日中に改修されそう：https://github.com/mastra-ai/mastra/issues/4461
+  // telemetry: {
+  //   serviceName: "your-service-name",
+  //   enabled: true,
+  //   export: {
+  //     type: "custom",
+  //     exporter: new AISDKExporter(),
+  //   },
+  // },
   server: {
     port: 3000, // デフォルトは4111
     timeout: 10000, // デフォルトは30000（30秒）
@@ -77,4 +76,13 @@ export const mastra = new Mastra({
       },
     ],
   },
+  deployer: new CloudflareDeployer({
+    scope: process.env.CLOUDFLARE_ACCOUNT_ID || "", // 環境変数から取得
+    projectName: process.env.CLOUDFLARE_PROJECT_NAME || "mastra-api-server", // 環境変数から取得（デフォルト値あり）
+    routes: [],
+    auth: {
+      apiToken: process.env.CLOUDFLARE_API_TOKEN || "", // 環境変数から取得
+      apiEmail: process.env.CLOUDFLARE_EMAIL || "", // 環境変数から取得
+    },
+  }),
 });

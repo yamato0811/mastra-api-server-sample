@@ -1,8 +1,6 @@
 import { openai } from "@ai-sdk/openai";
 import { Agent } from "@mastra/core";
 import { RuntimeContext } from "@mastra/core/di";
-import { Memory } from "@mastra/memory";
-import { LibSQLStore } from "@mastra/libsql";
 
 // ランタイムコンテキストの型定義
 type MyAgentRuntimeContext = {
@@ -20,11 +18,6 @@ export const myAgent = new Agent({
     return baseInstruction;
   },
   model: openai("gpt-4.1-mini"),
-  memory: new Memory({
-    storage: new LibSQLStore({
-      url: "file:../mastra.db",
-    }),
-  }),
 });
 
 // 動的エージェントを使用するためのヘルパー関数

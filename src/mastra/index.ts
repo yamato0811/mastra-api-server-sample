@@ -1,8 +1,6 @@
 import { Mastra } from "@mastra/core/mastra";
 import { PinoLogger } from "@mastra/loggers";
-import { CloudflareStore } from "@mastra/cloudflare";
-// import { LibSQLStore } from "@mastra/libsql";
-// import { AISDKExporter } from "langsmith/vercel";
+import { AISDKExporter } from "langsmith/vercel";
 
 import { myAgent, generateWithDynamicRole } from "./agents/my-agent";
 import { CloudflareDeployer } from "@mastra/deployer-cloudflare";
@@ -13,16 +11,14 @@ export const mastra = new Mastra({
     name: "Mastra",
     level: "info",
   }),
-  // build時にlangsmithを利用するとエラーが出るのでコメントアウト
-  // 近日中に改修されそう：https://github.com/mastra-ai/mastra/issues/4461
-  // telemetry: {
-  //   serviceName: "your-service-name",
-  //   enabled: true,
-  //   export: {
-  //     type: "custom",
-  //     exporter: new AISDKExporter(),
-  //   },
-  // },
+  telemetry: {
+    serviceName: "mastra-langsmith",
+    enabled: true,
+    export: {
+      type: "custom",
+      exporter: new AISDKExporter(),
+    },
+  },
   server: {
     port: 3000, // デフォルトは4111
     timeout: 10000, // デフォルトは30000（30秒）

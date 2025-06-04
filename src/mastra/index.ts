@@ -1,5 +1,7 @@
 import { Mastra } from "@mastra/core/mastra";
 import { PinoLogger } from "@mastra/loggers";
+import { CloudflareStore } from "@mastra/cloudflare";
+// import { LibSQLStore } from "@mastra/libsql";
 // import { AISDKExporter } from "langsmith/vercel";
 
 import { myAgent, generateWithDynamicRole } from "./agents/my-agent";
@@ -31,20 +33,25 @@ export const mastra = new Mastra({
       credentials: false,
     },
     apiRoutes: [
-      // 動的エージェントAPI
+      // 動的エージェントAPI（スレッド対応）
       {
         path: "/api/agent/chat",
         method: "POST",
         handler: async (c) => {
           try {
             const body = await c.req.json();
-            const { message, role } = body;
+            const { message, role, threadId } = body;
 
-            // 動的エージェントでレスポンス生成
-            const response = await generateWithDynamicRole(message, role);
+            // 動的エージェントでレスポンス生成（スレッド対応）
+            const response = await generateWithDynamicRole(
+              message,
+              role,
+              threadId,
+            );
 
             return c.json({
-              response,
+              response: response.text,
+              threadId: response.threadId,
               config: {
                 role,
               },
@@ -77,12 +84,12 @@ export const mastra = new Mastra({
     ],
   },
   deployer: new CloudflareDeployer({
-    scope: process.env.CLOUDFLARE_ACCOUNT_ID || "", // 環境変数から取得
-    projectName: process.env.CLOUDFLARE_PROJECT_NAME || "mastra-api-server", // 環境変数から取得（デフォルト値あり）
+    scope: process.env.CLOUDFLARE_ACCOUNT_ID!,
+    projectName: process.env.CLOUDFLARE_PROJECT_NAME!,
     routes: [],
     auth: {
-      apiToken: process.env.CLOUDFLARE_API_TOKEN || "", // 環境変数から取得
-      apiEmail: process.env.CLOUDFLARE_EMAIL || "", // 環境変数から取得
+      apiToken: process.env.CLOUDFLARE_API_TOKEN!,
+      apiEmail: process.env.CLOUDFLARE_EMAIL!,
     },
   }),
 });

@@ -30,16 +30,21 @@ wrangler whoami
 
 ### 3. 環境変数の設定
 
-プロジェクトルートに`.env`ファイルを作成し、以下の環境変数を設定してください：
+プロジェクトルートに`.env.production`ファイルを作成し、以下の環境変数を設定してください：
 
 ```bash
+# .env.production
+NODE_ENV=production
+OPENAI_API_KEY=your-openai-api-key
+LIBSQL_URL=libsql://your-database-name.aws-region.turso.io
+LIBSQL_AUTH_TOKEN=your_libsql_auth_token
 CLOUDFLARE_API_TOKEN=your-cloudflare-api-token
 CLOUDFLARE_EMAIL=your-cloudflare-email
 CLOUDFLARE_ACCOUNT_ID=your-cloudflare-account-id
 CLOUDFLARE_PROJECT_NAME=your-project-name
 ```
 
-## 🚀 デプロイ手順
+## デプロイ手順
 
 ### ステップ1: プロジェクトの準備
 
@@ -54,8 +59,8 @@ npx mastra lint
 ### ステップ2: ビルドとデプロイ
 
 ```bash
-# Mastraプロジェクトのビルド
-npx mastra build
+# Mastraプロジェクトのビルド（本番環境設定を使用）
+npm run build:prod
 ```
 
 このコマンドにより、以下が実行されます：
@@ -98,7 +103,9 @@ MastraのCloudflareDeployerは、以下の設定を含む`wrangler.json`を自�
     }
   },
   "vars": {
-    "OPENAI_API_KEY": "your-openai-api-key"
+    "OPENAI_API_KEY": "your-openai-api-key",
+    "LIBSQL_URL": "libsql://your-database-name.aws-region.turso.io",
+    "LIBSQL_AUTH_TOKEN": "your_libsql_auth_token"
   }
 }
 ```
@@ -107,7 +114,7 @@ MastraのCloudflareDeployerは、以下の設定を含む`wrangler.json`を自�
 
 CloudflareDeployerは以下のソースから環境変数を自動的に処理します：
 
-1. **環境ファイル**: `.env.production` と `.env` ファイル
+1. **環境ファイル**: `.env.production` ファイル
 2. **システム環境変数**: `process.env` から取得
 3. **設定パラメータ**: `env` オプションで指定された変数
 
@@ -214,16 +221,16 @@ rm -rf .mastra/output
 # 依存関係を再インストール
 npm install
 
-# 再ビルド
-npx mastra build
+# 再ビルド（本番環境設定を使用）
+npm run build:prod
 ```
 
 #### 4. 環境変数が反映されない
 
 **解決策**:
-- `.env` ファイルが正しい場所にあるか確認
+- `.env.production` ファイルが正しい場所にあるか確認
 - 環境変数名が正確か確認
-- `npx mastra build` を再実行
+- `npm run build:prod` を再実行
 
 ## 🔗 関連リンク
 
@@ -231,3 +238,4 @@ npx mastra build
 - [Cloudflare Workers公式ドキュメント](https://developers.cloudflare.com/workers/)
 - [Wrangler CLI公式ドキュメント](https://developers.cloudflare.com/workers/wrangler/)
 - [Cloudflare API トークン管理](https://dash.cloudflare.com/profile/api-tokens)
+- [Turso公式ドキュメント](https://docs.turso.tech/)
